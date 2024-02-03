@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
 import NoPage from "./pages/NoPage";
-import ProductListing from "./pages/ProductListing";
+import Products from "./pages/Products";
 
 const App: React.FC = () => {
 	return (
@@ -12,7 +12,8 @@ const App: React.FC = () => {
 			<Routes>
 				<Route path="/" element={<Layout />}>
 					<Route index element={<Home />} />
-					<Route path="products" element={<ProductListing />} />
+					<Route path="products" element={<Products />} />
+					<Route path="product/:id" element={<Products />} />
 					<Route path="*" element={<NoPage />} />
 				</Route>
 			</Routes>

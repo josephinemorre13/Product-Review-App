@@ -4,7 +4,7 @@ interface ApiResponse {
     // Add other relevant properties as needed
 }
 
-const fetchProducts = async (): Promise<ApiResponse | any> => {
+const fetchProductsData = async (): Promise<ApiResponse | any> => {
     try {
         // Fetch data from an API endpoint
         const response = await fetch(
@@ -26,11 +26,11 @@ const fetchProducts = async (): Promise<ApiResponse | any> => {
             return dateB - dateA;
         });
 
-        return products;
+        return { data: products };
     } catch (error) {
         console.error("Error fetching products:", error);
         throw error;
     }
 };
 
-export { fetchProducts };
+export { fetchProductsData };
