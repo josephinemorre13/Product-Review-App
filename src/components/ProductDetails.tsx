@@ -1,4 +1,6 @@
-import { Box, Skeleton } from "@mui/material";
+import { Box, Container, Skeleton } from "@mui/material";
+import Details from "./Details";
+import Image from "./Image";
 
 interface ProductDetailsProps {
     id: string;
@@ -26,11 +28,12 @@ const ProductDetails: React.FC<ProductDetailsProps> = (props) => {
     }
 
     return (
-        <div>
-            <h2>{product.name}</h2>
-            <p>{product.details}</p>
-            <p>{product.createdAt}</p>
-        </div>
+        <Container component="section" maxWidth={"lg"}>
+            <section className="core">
+                <Image imgSrc={product.image} />
+                <Details product={product} />
+            </section>
+        </Container>
     );
 }
 

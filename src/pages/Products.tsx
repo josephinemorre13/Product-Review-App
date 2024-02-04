@@ -1,18 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import ProductsComponent from '../components/ProductListing';
+import ProductsListing from '../components/ProductListing';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductsData } from '../services/api';
 import { RootState } from '../store/reducers';
 import ProductDetails from '../components/ProductDetails';
+import SearchBar from '../components/SearchBar';
+import CategoriesDropdown from '../components/CategoriesDropdown';
 
 const Products: React.FC = () => {
     const { id } = useParams();
 
     const dispatch = useDispatch();
     const { data, loading, error } = useSelector((state: RootState) => state.data);
+
+    const [selectedCategory, setSelectedCategory] = useState<string>('All');
+    const [searchParams, setSearchParams] = useState<string>('');
+
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category)
+    }
     
+    const handleSearchParamsChange = (params: string) => {
+        setSearchParams(params)
+    }
+
+    const filteredProducts = selectedCategory === 'All' ?
+        (searchParams === '' ? data : data.filter((v: any) => v.name === searchParams)) :
+        (searchParams === '' ? data.filter((v: any) => v.category === selectedCategory) : data.filter((v: any) => v.category === selectedCategory && v.name === searchParams))
+
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
@@ -31,7 +48,11 @@ const Products: React.FC = () => {
         <div>
             {id ?
                 <ProductDetails id={id} data={data} loading={loading} error={error} /> :
-                <ProductsComponent data={data} loading={loading} error={error} />}
+                <>
+                    <SearchBar products={data} searchParams={searchParams} handleSearchParamsChange={handleSearchParamsChange} />
+                    <CategoriesDropdown products={data} handleCategoryChange={handleCategoryChange} selectedCategory={selectedCategory} />
+                    <ProductsListing data={filteredProducts} loading={loading} error={error} />
+                </>}
         </div>
     );
 };

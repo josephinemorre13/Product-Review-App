@@ -1,5 +1,5 @@
 import Grid from '@mui/material/Grid';
-import { Box, Typography, Skeleton } from '@mui/material';
+import { Box, Typography, Skeleton, Rating } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import { useNavigate } from "react-router-dom";
 
@@ -40,7 +40,7 @@ const ProductListing: React.FC<ProductListingProps> = (props) => {
                                         Category: {item.category}
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
-                                        <StarIcon /><StarIcon /><StarIcon /><StarIcon /><StarIcon />
+                                        <Rating name="read-only" value={0} readOnly /> No reviews yet
                                     </Typography>
                                 </Box>
                             ) : (

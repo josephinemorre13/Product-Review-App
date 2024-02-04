@@ -18,6 +18,8 @@ const fetchProductsData = async (): Promise<ApiResponse | any> => {
             categories.products.forEach((product: any) => {
                 product.category = category;
                 products.push(product);
+                console.log("🚀 ~ categories.products.forEach ~ product.products:", product.products)
+                
             });
         });
         products.sort((a, b) => {
