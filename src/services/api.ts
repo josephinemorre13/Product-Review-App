@@ -4,35 +4,93 @@ interface ApiResponse {
     // Add other relevant properties as needed
 }
 
-const fetchProductsData = async (): Promise<ApiResponse | any> => {
+const fetchCategories = async (url: string): Promise<ApiResponse | any> => {
+    const response = await fetch(url, {
+        method: "GET",
+        headers: { "content-type": "application/json" },
+    });
+    return await response.json();
+};
+
+const fetchProducts = async (url: string): Promise<ApiResponse | any> => {
+    const response = await fetch(url, {
+        method: "GET",
+        headers: { "content-type": "application/json" },
+    });
+    return await response.json();
+};
+
+const fetchReviews = async (): Promise<ApiResponse | any> => {
+    const response = await fetch(
+        "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/reviews",
+        {
+            method: "GET",
+            headers: { "content-type": "application/json" },
+        }
+    );
+    return await response.json();
+};
+
+const fetchData = async (): Promise<ApiResponse | any> => {
     try {
-        // Fetch data from an API endpoint
-        const response = await fetch(
-            "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/categories"
+        let products = await fetchProducts(
+            "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/products?sortBy=createdAt&order=desc"
         );
-        const data = await response.json();
+        const categories = await fetchCategories(
+            "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/categories?sortBy=name"
+        );
 
-        const products: any[] = [];
-        data.map((categories: any) => {
-            const category = categories.name;
-            categories.products.forEach((product: any) => {
-                product.category = category;
-                products.push(product);
-                console.log("🚀 ~ categories.products.forEach ~ product.products:", product.products)
-                
-            });
-        });
-        products.sort((a, b) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
-            return dateB - dateA;
+        products = products.map((product: any) => {
+            const category = categories.find(
+                (v: any) => v.id === product.categoryId
+            );
+            product.category = category ? category.name : "";
+            return product;
         });
 
-        return { data: products };
+        return {
+            products: products,
+            categories: ["All", ...categories.map((v: any) => v.name)],
+        };
     } catch (error) {
         console.error("Error fetching products:", error);
         throw error;
     }
 };
 
-export { fetchProductsData };
+const fetchProductsWithSearchParamsAndByCategory = async (
+    searchParams: string,
+    selectedCategory: string
+): Promise<ApiResponse | any> => {
+    try {
+        const categories = await fetchCategories(
+            "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/categories?sortBy=name"
+        );
+        let products = await fetchProducts(
+            `https://5ffbed0e63ea2f0017bdb67d.mockapi.io/products?search=${searchParams}&sortBy=createdAt&order=desc`
+        );
+
+        products = products.map((product: any) => {
+            const category = categories.find(
+                (v: any) => v.id === product.categoryId
+            );
+            product.category = category ? category.name : "";
+            return product;
+        });
+
+        return {
+            categories: ["All", ...categories.map((v: any) => v.name)],
+            products:
+                selectedCategory === "All"
+                    ? products
+                    : products.filter(
+                          (v: any) => v.category === selectedCategory
+                      ),
+        };
+    } catch (error) {
+        console.error("Error fetching products with serach params:", error);
+        throw error;
+    }
+};
+
+export { fetchData, fetchProductsWithSearchParamsAndByCategory };

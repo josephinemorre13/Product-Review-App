@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductsListing from '../components/ProductListing';
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchProductsData } from '../services/api';
-import { RootState } from '../store/reducers';
-import ProductDetails from '../components/ProductDetails';
+import { useDispatch } from 'react-redux';
+import { fetchData, fetchProductsWithSearchParamsAndByCategory } from '../services/api';
+import Product from '../components/Product';
 import SearchBar from '../components/SearchBar';
 import CategoriesDropdown from '../components/CategoriesDropdown';
 
@@ -13,29 +12,74 @@ const Products: React.FC = () => {
     const { id } = useParams();
 
     const dispatch = useDispatch();
-    const { data, loading, error } = useSelector((state: RootState) => state.data);
 
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
     const [searchParams, setSearchParams] = useState<string>('');
 
-    const handleCategoryChange = (category: string) => {
+    const handleFetchDataByCategoryAndSerachParams = async (searchParams: string, selectedCategory: string) => {
+        try {
+            dispatch({ type: 'FETCH_DATA_REQUEST' });
+            const result = await fetchProductsWithSearchParamsAndByCategory(searchParams, selectedCategory);
+            dispatch({
+                type: 'FETCH_DATA_SUCCESS', payload: {
+                    products: result.products,
+                    categories: result.categories
+                }
+            });
+        } catch (error: any) {
+            dispatch({ type: 'FETCH_DATA_FAILURE', payload: error.message });
+        }
+    }
+
+    const handleCategoryChange = async (category: string) => {
+        await handleFetchDataByCategoryAndSerachParams(searchParams, category)
         setSelectedCategory(category)
     }
-    
-    const handleSearchParamsChange = (params: string) => {
+
+    const handleSearchParamsChange = async (params: string) => {
+        if (params === '') await handleFetchDataByCategoryAndSerachParams(params, selectedCategory)
         setSearchParams(params)
     }
 
-    const filteredProducts = selectedCategory === 'All' ?
-        (searchParams === '' ? data : data.filter((v: any) => v.name === searchParams)) :
-        (searchParams === '' ? data.filter((v: any) => v.category === selectedCategory) : data.filter((v: any) => v.category === selectedCategory && v.name === searchParams))
+    const handleKeyPressInSearchBar = async (key: string) => {
+        if (key === 'Enter') {
+            await handleFetchDataByCategoryAndSerachParams(searchParams, selectedCategory)
+        }
+    }
+
+    const mapRatings = (reviews: any) => {
+        return reviews.map((rate: any) => {
+            const ratingValue = typeof rate.rating === 'string' ? parseInt(rate.rating, 10) : rate.rating;
+            const firstDigit = Math.floor(Math.abs(ratingValue) / Math.pow(10, Math.floor(Math.log10(Math.abs(ratingValue)))));
+            const mappedRating = (firstDigit >= 0 && firstDigit <= 5) ? 1 : 5;
+
+            return {
+                ...rate,
+                mappedRating,
+            };
+        });
+    }
+
+    const calculateAverageRating = (reviews: any) => {
+        const mappedRatings = mapRatings(reviews);
+        const totalMappedRating = mappedRatings.reduce((accumulator: number, rate: any) => {
+            return accumulator + rate.mappedRating;
+        }, 0);
+
+        return parseFloat((totalMappedRating / reviews.length).toFixed(3));
+    }
 
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
                 dispatch({ type: 'FETCH_DATA_REQUEST' });
-                const result = await fetchProductsData();
-                dispatch({ type: 'FETCH_DATA_SUCCESS', payload: result.data });
+                const result = await fetchData();
+                dispatch({
+                    type: 'FETCH_DATA_SUCCESS', payload: {
+                        products: result.products,
+                        categories: result.categories
+                    }
+                });
             } catch (error: any) {
                 dispatch({ type: 'FETCH_DATA_FAILURE', payload: error.message });
             }
@@ -47,11 +91,11 @@ const Products: React.FC = () => {
     return (
         <div>
             {id ?
-                <ProductDetails id={id} data={data} loading={loading} error={error} /> :
+                <Product id={id} calculateAverageRating={calculateAverageRating} mapRatings={mapRatings} /> :
                 <>
-                    <SearchBar products={data} searchParams={searchParams} handleSearchParamsChange={handleSearchParamsChange} />
-                    <CategoriesDropdown products={data} handleCategoryChange={handleCategoryChange} selectedCategory={selectedCategory} />
-                    <ProductsListing data={filteredProducts} loading={loading} error={error} />
+                    <SearchBar searchParams={searchParams} handleSearchParamsChange={handleSearchParamsChange} handleKeyPressInSearchBar={handleKeyPressInSearchBar} />
+                    <CategoriesDropdown handleCategoryChange={handleCategoryChange} selectedCategory={selectedCategory} />
+                    <ProductsListing calculateAverageRating={calculateAverageRating} />
                 </>}
         </div>
     );

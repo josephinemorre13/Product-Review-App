@@ -1,18 +1,16 @@
 import { Autocomplete, Skeleton, TextField } from "@mui/material";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/reducers";
 
 interface CategoriesDropdownProps {
-    products: any;
     selectedCategory: string;
     handleCategoryChange: any;
 }
 const CategoriesDropdown: React.FC<CategoriesDropdownProps> = (props) => {
-    const { products, selectedCategory, handleCategoryChange } = props;
+    const { selectedCategory, handleCategoryChange } = props;
+    const { products, categories } = useSelector((state: RootState) => state.data);
 
     if (!products) return <Skeleton height={50} width={500} />
-
-    const categories = ['All']
-    
-    categories.push(...products.map((v: any) => v.category).sort())
 
     return (
         <Autocomplete

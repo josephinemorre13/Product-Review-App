@@ -1,39 +1,27 @@
-import { Autocomplete, Skeleton, TextField } from "@mui/material";
+import { Skeleton, TextField } from "@mui/material";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/reducers";
 
 interface SearchBarProps {
-    products: any;
     searchParams: string;
     handleSearchParamsChange: any;
+    handleKeyPressInSearchBar: any;
 }
 const SearchBar: React.FC<SearchBarProps> = (props) => {
-    const { products, searchParams, handleSearchParamsChange } = props;
+    const { searchParams, handleSearchParamsChange, handleKeyPressInSearchBar } = props;
+    const { products } = useSelector((state: RootState) => state.data);
 
     if (!products) return <Skeleton height={50} width={500} />
 
     return (
         <div>
-            <TextField 
-                id="outlined-search" 
+            <TextField
+                id="outlined-search"
                 label="Search"
-                onChange={(e) => handleSearchParamsChange(e.target.value)} 
-                value={searchParams} 
-                type="search" 
-            />
-            <Autocomplete
-                freeSolo
-                id="free-solo-2-demo"
-                disableClearable
-                options={products.map((option: any) => option.name)}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        label="Search input"
-                        InputProps={{
-                            ...params.InputProps,
-                            type: 'search',
-                        }}
-                    />
-                )}
+                onChange={(e) => handleSearchParamsChange(e.target.value)}
+                onKeyDown={(e) => handleKeyPressInSearchBar(e.key)}
+                value={searchParams}
+                type="search"
             />
         </div>
     )
