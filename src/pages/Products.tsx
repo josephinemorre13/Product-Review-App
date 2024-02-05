@@ -7,6 +7,8 @@ import { fetchData, fetchProductsWithSearchParamsAndByCategory } from '../servic
 import Product from '../components/Product';
 import SearchBar from '../components/SearchBar';
 import CategoriesDropdown from '../components/CategoriesDropdown';
+import { Box } from '@mui/material';
+import { ReviewInteface } from '../store/types';
 
 const Products: React.FC = () => {
     const { id } = useParams();
@@ -47,22 +49,22 @@ const Products: React.FC = () => {
         }
     }
 
-    const mapRatings = (reviews: any) => {
-        return reviews.map((rate: any) => {
-            const ratingValue = typeof rate.rating === 'string' ? parseInt(rate.rating, 10) : rate.rating;
+    const mapRatings = (reviews: ReviewInteface[]) => {
+        return reviews.map((review: ReviewInteface) => {
+            const ratingValue = typeof review.rating === 'string' ? parseInt(review.rating, 10) : review.rating;
             const firstDigit = Math.floor(Math.abs(ratingValue) / Math.pow(10, Math.floor(Math.log10(Math.abs(ratingValue)))));
             const mappedRating = (firstDigit >= 0 && firstDigit <= 5) ? 1 : 5;
 
             return {
-                ...rate,
+                ...review,
                 mappedRating,
             };
         });
     }
 
-    const calculateAverageRating = (reviews: any) => {
+    const calculateAverageRating = (reviews: ReviewInteface[]) => {
         const mappedRatings = mapRatings(reviews);
-        const totalMappedRating = mappedRatings.reduce((accumulator: number, rate: any) => {
+        const totalMappedRating = mappedRatings.reduce((accumulator: number, rate: ReviewInteface | any) => {
             return accumulator + rate.mappedRating;
         }, 0);
 
@@ -77,7 +79,8 @@ const Products: React.FC = () => {
                 dispatch({
                     type: 'FETCH_DATA_SUCCESS', payload: {
                         products: result.products,
-                        categories: result.categories
+                        categories: result.categories,
+                        reviews: result.reviews
                     }
                 });
             } catch (error: any) {
@@ -93,8 +96,10 @@ const Products: React.FC = () => {
             {id ?
                 <Product id={id} calculateAverageRating={calculateAverageRating} mapRatings={mapRatings} /> :
                 <>
-                    <SearchBar searchParams={searchParams} handleSearchParamsChange={handleSearchParamsChange} handleKeyPressInSearchBar={handleKeyPressInSearchBar} />
-                    <CategoriesDropdown handleCategoryChange={handleCategoryChange} selectedCategory={selectedCategory} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1, width: '100%', marginLeft: 5 }}>
+                        <Box sx={{ width: '500px', margin: 2 }}><SearchBar searchParams={searchParams} handleSearchParamsChange={handleSearchParamsChange} handleKeyPressInSearchBar={handleKeyPressInSearchBar} /></Box>
+                        <Box sx={{ width: '500px', margin: 2}}><CategoriesDropdown handleCategoryChange={handleCategoryChange} selectedCategory={selectedCategory} /></Box>
+                    </Box>
                     <ProductsListing calculateAverageRating={calculateAverageRating} />
                 </>}
         </div>

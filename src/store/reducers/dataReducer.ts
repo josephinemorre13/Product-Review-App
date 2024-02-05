@@ -4,7 +4,7 @@ import { AnyAction } from 'redux';
 const initialState = {
 	categories: null,
 	products: null,
-	// reviews: null,
+	reviews: null,
 	loading: false,
 	error: null,
 };
@@ -19,9 +19,8 @@ const dataReducer = (state = initialState, action: AnyAction) => {
 				...state, 
 				loading: false, 
 				products: action.payload.products, 
-				categories: action.payload.categories, 
-				// products: action.payload.products, 
-				// reviews: action.payload.products 
+				categories: action.payload.categories,
+				reviews: action.payload.reviews
 			};
 		case 'FETCH_DATA_FAILURE':
 			return { ...state, loading: false, error: action.payload.error };

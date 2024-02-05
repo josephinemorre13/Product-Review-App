@@ -11,7 +11,7 @@ const App: React.FC = () => {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/" element={<Layout />}>
-					<Route index element={<Home />} />
+					<Route index element={<Products />} />
 					<Route path="products" element={<Products />} />
 					<Route path="product/:id" element={<Products />} />
 					<Route path="*" element={<NoPage />} />

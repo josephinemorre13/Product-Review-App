@@ -20,6 +20,7 @@ const CategoriesDropdown: React.FC<CategoriesDropdownProps> = (props) => {
             value={selectedCategory}
             onChange={(e, value) => handleCategoryChange(value)}
             renderInput={(params) => <TextField {...params} label="Categories" />}
+            fullWidth
         />
     )
 }

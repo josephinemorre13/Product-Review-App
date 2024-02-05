@@ -1,10 +1,12 @@
+import { CategoryInteface, ProductInteface, ReviewInteface } from "../store/types";
+
 interface ApiResponse {
     // Define the structure of your API response
     data: any;
     // Add other relevant properties as needed
 }
 
-const fetchCategories = async (url: string): Promise<ApiResponse | any> => {
+const fetchCategories = async (url: string): Promise<CategoryInteface[]> => {
     const response = await fetch(url, {
         method: "GET",
         headers: { "content-type": "application/json" },
@@ -12,7 +14,7 @@ const fetchCategories = async (url: string): Promise<ApiResponse | any> => {
     return await response.json();
 };
 
-const fetchProducts = async (url: string): Promise<ApiResponse | any> => {
+const fetchProducts = async (url: string): Promise<ProductInteface[]> => {
     const response = await fetch(url, {
         method: "GET",
         headers: { "content-type": "application/json" },
@@ -20,7 +22,7 @@ const fetchProducts = async (url: string): Promise<ApiResponse | any> => {
     return await response.json();
 };
 
-const fetchReviews = async (): Promise<ApiResponse | any> => {
+const fetchReviews = async (): Promise<ReviewInteface[]> => {
     const response = await fetch(
         "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/reviews",
         {
@@ -31,7 +33,7 @@ const fetchReviews = async (): Promise<ApiResponse | any> => {
     return await response.json();
 };
 
-const fetchData = async (): Promise<ApiResponse | any> => {
+const fetchData = async (): Promise<any> => {
     try {
         let products = await fetchProducts(
             "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/products?sortBy=createdAt&order=desc"
@@ -40,7 +42,7 @@ const fetchData = async (): Promise<ApiResponse | any> => {
             "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/categories?sortBy=name"
         );
 
-        products = products.map((product: any) => {
+        products = products.map((product: ProductInteface) => {
             const category = categories.find(
                 (v: any) => v.id === product.categoryId
             );
@@ -50,7 +52,10 @@ const fetchData = async (): Promise<ApiResponse | any> => {
 
         return {
             products: products,
-            categories: ["All", ...categories.map((v: any) => v.name)],
+            categories: ["All", ...categories.map((v: CategoryInteface) => v.name)],
+            reviews: (await fetchReviews())
+                .slice()
+                .sort((a: any, b: any) => b.id - a.id),
         };
     } catch (error) {
         console.error("Error fetching products:", error);
@@ -70,7 +75,7 @@ const fetchProductsWithSearchParamsAndByCategory = async (
             `https://5ffbed0e63ea2f0017bdb67d.mockapi.io/products?search=${searchParams}&sortBy=createdAt&order=desc`
         );
 
-        products = products.map((product: any) => {
+        products = products.map((product: ProductInteface) => {
             const category = categories.find(
                 (v: any) => v.id === product.categoryId
             );
@@ -79,12 +84,12 @@ const fetchProductsWithSearchParamsAndByCategory = async (
         });
 
         return {
-            categories: ["All", ...categories.map((v: any) => v.name)],
+            categories: ["All", ...categories.map((v: CategoryInteface) => v.name)],
             products:
                 selectedCategory === "All"
                     ? products
                     : products.filter(
-                          (v: any) => v.category === selectedCategory
+                          (v: ProductInteface) => v.category === selectedCategory
                       ),
         };
     } catch (error) {
@@ -93,4 +98,47 @@ const fetchProductsWithSearchParamsAndByCategory = async (
     }
 };
 
-export { fetchData, fetchProductsWithSearchParamsAndByCategory };
+const createReview = async (review: ReviewInteface): Promise<ReviewInteface> => {
+    const response = await fetch(
+        "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/reviews",
+        {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(review),
+        }
+    );
+    return await response.json();
+};
+
+const updateReview = async (
+    reviewId: string,
+    updatedReview: ReviewInteface
+): Promise<ReviewInteface> => {
+    const response = await fetch(
+        "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/reviews/" + reviewId,
+        {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(updatedReview),
+        }
+    );
+    return await response.json();
+};
+
+const deleteReview = async (reviewId: string): Promise<ReviewInteface> => {
+    const response = await fetch(
+        "https://5ffbed0e63ea2f0017bdb67d.mockapi.io/reviews/" + reviewId,
+        {
+            method: "DELETE",
+        }
+    );
+    return await response.json();
+};
+
+export {
+    fetchData,
+    fetchProductsWithSearchParamsAndByCategory,
+    createReview,
+    updateReview,
+    deleteReview,
+};

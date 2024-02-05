@@ -22,6 +22,7 @@ const SearchBar: React.FC<SearchBarProps> = (props) => {
                 onKeyDown={(e) => handleKeyPressInSearchBar(e.key)}
                 value={searchParams}
                 type="search"
+                fullWidth
             />
         </div>
     )

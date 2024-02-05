@@ -1,6 +1,7 @@
 import { Box, Divider, Rating, Typography } from "@mui/material";
 import React from "react";
 import StarIcon from '@mui/icons-material/Star';
+import { ReviewInteface } from "../store/types";
 
 type ProductDetails = {
     name: string;
@@ -9,7 +10,7 @@ type ProductDetails = {
     category: string;
     currency: string;
     price: string;
-    reviews: any
+    reviews: ReviewInteface[]
 }
 
 interface DetailsProps {
@@ -36,7 +37,7 @@ const Details: React.FC<DetailsProps> = (props) => {
                 <Rating
                     name="read-only"
                     value={reviews.length === 0 ? 0 : calculateAverageRating(reviews)}
-                    precision={0.5}
+                    precision={0.2}
                     readOnly
                     emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
                 />

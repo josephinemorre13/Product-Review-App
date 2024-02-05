@@ -4,6 +4,7 @@ import Image from "./Image";
 import { RootState } from "../store/reducers";
 import { useSelector } from 'react-redux';
 import Reviews from "./Reviews";
+import { ProductInteface } from "../store/types";
 
 interface ProductProps {
     id: string;
@@ -15,7 +16,7 @@ const Product: React.FC<ProductProps> = (props) => {
     const { id, calculateAverageRating, mapRatings } = props;
     const { products, loading, error } = useSelector((state: RootState) => state.data);
 
-    const product = products && products.length ? products.find((v: any) => v.id === id) : null;
+    const product = products && products.length ? products.find((v: ProductInteface) => v.id === id) : null;
 
     if (error) return <p>Error: {error}</p>
 
@@ -36,7 +37,7 @@ const Product: React.FC<ProductProps> = (props) => {
                 <Details product={product} calculateAverageRating={calculateAverageRating} />
             </section>
             <Divider variant="middle" />
-            <Reviews calculateAverageRating={calculateAverageRating} reviews={product.reviews} mapRatings={mapRatings} />
+            <Reviews calculateAverageRating={calculateAverageRating} reviews={product.reviews} mapRatings={mapRatings} productId={product.id} />
         </Container>
     );
 }
